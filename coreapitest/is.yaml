@@ -1,0 +1,12 @@
+kind: "ImageStream"
+apiVersion: "v1"
+metadata:
+  name: "coreapitest"
+spec:
+  tags:
+  - from:
+      kind: "DockerImage"
+      name: "docker-registry.default.svc:5000/govil/coreapitest:0.1"
+    name: "0.1"
+    importPolicy:
+      scheduled: true

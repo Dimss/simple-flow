@@ -1,0 +1,19 @@
+kind: "BuildConfig"
+apiVersion: "v1"
+metadata:
+  name: "coreapitest"
+spec:
+  runPolicy: "Serial"
+  source:
+    git:
+      uri: "https://github.com/Dimss/CoreApiTest.git"
+  strategy:
+    sourceStrategy:
+      from:
+        kind: "ImageStreamTag"
+        name: "dotnet:2.1"
+        namespace: "openshift"
+  output:
+    to:
+      kind: "ImageStreamTag"
+      name: "coreapitest:0.1"

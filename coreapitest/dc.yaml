@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: coreapitest
+spec:
+  replicas: 1
+  selector:
+    name: coreapitest
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        name: coreapitest
+    spec:
+      containers:
+        image: ' '
+        name: coreapitest
+      restartPolicy: Always
+  triggers:
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - coreapitest
+      from:
+        kind: ImageStreamTag
+        name: coreapitest:0.1
+        namespace: govil
+    type: ImageChange
+  - type: ConfigChange

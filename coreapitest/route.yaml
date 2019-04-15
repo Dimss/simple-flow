@@ -1,0 +1,11 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: coreapitest
+spec:
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: coreapitest
+    weight: 100

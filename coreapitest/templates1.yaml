@@ -1,0 +1,32 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: my-test
+message: |-
+  The following service(s) have been created in your project: ${DATABASE_SERVICE_NAME}.
+
+         Username: ${MYSQL_USER}
+         Password: ${MYSQL_PASSWORD}
+    Database Name: ${MYSQL_DATABASE}
+   Connection URL: mysql://${DATABASE_SERVICE_NAME}:3306/
+
+  For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/mysql-container/blob/master/5.7/root/usr/share/container-scripts/mysql/README.md.
+metadata:
+  annotations:
+    description: asdasd
+    iconClass: icon-mysql-database
+    openshift.io/display-name: MySQL (Ephemeral)
+    openshift.io/documentation-url: https://docs.openshift.org/latest/using_images/db_images/mysql.html
+    openshift.io/long-description: bla
+    tags: database,mysql
+  name: my-test
+objects:
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: as
+  stringData:
+    database-name: as
+    database-password: ad
+    database-root-password: asd
+    database-user: as

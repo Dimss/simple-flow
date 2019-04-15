@@ -1,0 +1,144 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  app: coreapitest
+  template: coreapitest-template
+message: A CoreAPITest has been created in your project
+metadata:
+  annotations:
+    description: GovIL CoreApiTest service for POC
+    iconClass: icon-jenkins
+    openshift.io/display-name: CoreAPITest
+    tags: instant-app,govil
+  name: coreapitest
+objects:
+- kind: "ImageStream"
+  apiVersion: "v1"
+  metadata:
+    name: coreapitest-${COREAPITEST_VERSION}
+  spec:
+    tags:
+    - from:
+        kind: "DockerImage"
+        name: docker-registry.default.svc:5000/govil/coreapitest:${COREAPITEST_VERSION}
+      name: coreapitest-${COREAPITEST_VERSION}
+      importPolicy:
+        scheduled: true
+- kind: "BuildConfig"
+  apiVersion: "v1"
+  metadata:
+    name: coreapitest-${COREAPITEST_VERSION}
+  spec:
+    runPolicy: "Serial"
+    source:
+      git:
+        uri: "https://github.com/Dimss/CoreApiTest.git"
+    strategy:
+      sourceStrategy:
+        from:
+          kind: "ImageStreamTag"
+          name: dotnet:${COREAPITEST_VERSION}
+    output:
+      to:
+        kind: "ImageStreamTag"
+        name: coreapitest-${COREAPITEST_VERSION}:${COREAPITEST_VERSION}
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: coreapitest-${COREAPITEST_VERSION}
+  spec:
+    replicas: 1
+    selector:
+      name: coreapitest-${COREAPITEST_VERSION}
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          name: coreapitest-${COREAPITEST_VERSION}
+      spec:
+        containers:
+          image: ' '
+          env:
+          - name: ControllerSettings__DbConfig__DbConnectionString
+            valueFrom:
+              secretKeyRef:
+                name: coreapitest-${COREAPITEST_VERSION}
+                key: db_conn_str
+          - name: ControllerSettings__DbConfig__DbName
+            valueFrom:
+              secretKeyRef:
+                name: coreapitest-${COREAPITEST_VERSION}
+                key: db_name
+          ports:
+          - containerPort: 8080
+          name: coreapitest-${COREAPITEST_VERSION}
+        restartPolicy: Always
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - coreapitest
+        from:
+          kind: ImageStreamTag
+          name: coreapitest-${COREAPITEST_VERSION}:${COREAPITEST_VERSION}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: coreapitest-${COREAPITEST_VERSION}
+  type: Opaque
+  stringData:
+    db_conn_str: "mongodb://${DB_USER}:${DB_PASS}@${DB_SERVICE}:27017/${DB_NAME}"
+    db_name: ${DB_NAME}
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: coreapitest-${COREAPITEST_VERSION}
+    lables:
+      app: coreapitest-${COREAPITEST_VERSION}
+  spec:
+    selector:
+      app: coreapitest-${COREAPITEST_VERSION}
+    ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    name: coreapitest-${COREAPITEST_VERSION}
+  spec:
+    port:
+      targetPort: http
+    to:
+      kind: Service
+      name: coreapitest-${COREAPITEST_VERSION}
+      weight: 100
+- description: CoreAPITest version
+  displayName: CoreAPITest version
+  name: COREAPITEST_VERSION
+  required: true
+  value: v0.1
+- description: Mongodb user
+  displayName: Mongodb user
+  name: DB_USER
+  required: true
+  value: mongo
+- description: Mongodb password
+  displayName: Mongodb password
+  name: DB_PASS
+  required: true
+  value: !q2w3e4r
+- description: Mongodb name
+  displayName: Mongodb name
+  name: DB_NAME
+  required: true
+  value: sampledb
+- description: Mongodb name
+  displayName: Mongodb name
+  name: DB_SERVICE
+  required: true
+  value: mongodb
+

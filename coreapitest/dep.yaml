@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coreapitest
+  labels:
+    app: coreapitest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: coreapitest
+  template:
+    metadata:
+      labels:
+        app: coreapitest
+    spec:
+      containers:
+      - name: coreapitest
+        image: "docker-registry.default.svc:5000/govil/coreapitest:0.1"
+        env:
+        - name: ControllerSettings__DbConfig__DbConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: coreapitest
+              key: db_conn_str
+        - name: ControllerSettings__DbConfig__DbName
+          valueFrom:
+            secretKeyRef:
+              name: coreapitest
+              key: db_name
+        ports:
+        - containerPort: 8080
